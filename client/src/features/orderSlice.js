@@ -41,16 +41,16 @@ export const getOrders = createAsyncThunk(
 
 export const getAllOrders = createAsyncThunk(
   'order/getAllOrders',
-  async (_, { rejectWithValue }) => {
+  async ({ page }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/order`,
-
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/order`, {
+        headers: { 'Content-Type': 'application/json' },
+        params: {
+          page,
+          limit: 12,
+        },
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -65,7 +65,7 @@ export const updateOrder = createAsyncThunk(
     try {
       const response = await axios.put(
         `${BASE_URL}/order/${userId}/${orderId}`,
-        { orderData },
+        orderData,
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
@@ -129,6 +129,7 @@ const initialState = {
   addresses: [],
   allOrders: [],
   selectaddress: '',
+  SuccessMsg: null,
 };
 
 export const orderSlice = createSlice({
@@ -146,7 +147,7 @@ export const orderSlice = createSlice({
     });
     //create new order
     builder.addCase(createNewOrder.fulfilled, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error = null;
       state.paymentUrl = action.payload.data.paymentInfo;
       state.orderInfoAfterPayment = action.payload.data.orderInfo;
@@ -162,7 +163,7 @@ export const orderSlice = createSlice({
       state.error = null;
     });
     builder.addCase(createAddressId.fulfilled, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error = null;
     });
     builder.addCase(createAddressId.rejected, (state, action) => {
@@ -176,7 +177,7 @@ export const orderSlice = createSlice({
       state.error = null;
     });
     builder.addCase(getAddress.fulfilled, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error = null;
       state.addresses = action.payload.data.addressInfo;
     });
@@ -191,7 +192,7 @@ export const orderSlice = createSlice({
       state.error = null;
     });
     builder.addCase(getOrders.fulfilled, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error = null;
       state.order = action.payload.data.orderInfo;
     });
@@ -206,7 +207,7 @@ export const orderSlice = createSlice({
       state.error = null;
     });
     builder.addCase(getAllOrders.fulfilled, (state, action) => {
-      state.loading = true;
+      state.loading = false;
       state.error = null;
       state.allOrders = action.payload.data.orderInfo;
     });
@@ -221,7 +222,8 @@ export const orderSlice = createSlice({
       state.error = null;
     });
     builder.addCase(updateOrder.fulfilled, (state, action) => {
-      state.loading = true;
+      state.SuccessMsg = action.payload.data;
+      state.loading = false;
       state.error = null;
     });
     builder.addCase(updateOrder.rejected, (state, action) => {
