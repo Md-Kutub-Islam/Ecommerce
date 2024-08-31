@@ -81,7 +81,10 @@ export const getProduct = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
+  const products = await Product.find({})
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   return res
     .status(200)
@@ -210,6 +213,7 @@ export const removeProduct = asyncHandler(async (req, res) => {
 
 export const uploadOtherImages = asyncHandler(async (req, res) => {
   const uploadedFiles = req.files;
+  console.log(uploadedFiles);
   const { productId } = req.params;
   const user = await req.user;
   const imageDataArray = [];
@@ -339,5 +343,7 @@ export const filterProducts = asyncHandler(async (req, res) => {
     throw new ApiError(400, `No items found with the respective filter params`);
   }
 
-  return res.status(200).json(new ApiResponse(200, products, ''));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { productInfo: products }, ''));
 });
